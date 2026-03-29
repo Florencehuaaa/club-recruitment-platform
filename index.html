@@ -1,0 +1,950 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>社团招新智能匹配平台</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Arial', sans-serif;
+            background-color: #f5f5f5;
+            color: #333;
+        }
+        
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        
+        header {
+            background-color: #4CAF50;
+            color: white;
+            padding: 20px;
+            text-align: center;
+            margin-bottom: 30px;
+            border-radius: 8px;
+        }
+        
+        nav {
+            background-color: white;
+            padding: 15px;
+            margin-bottom: 30px;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        
+        nav ul {
+            list-style: none;
+            display: flex;
+            justify-content: space-around;
+        }
+        
+        nav ul li a {
+            text-decoration: none;
+            color: #333;
+            font-weight: bold;
+            padding: 8px 16px;
+            border-radius: 4px;
+            transition: background-color 0.3s;
+        }
+        
+        nav ul li a:hover {
+            background-color: #f0f0f0;
+        }
+        
+        section {
+            background-color: white;
+            padding: 20px;
+            margin-bottom: 30px;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        
+        h2 {
+            margin-bottom: 20px;
+            color: #4CAF50;
+        }
+        
+        .form-group {
+            margin-bottom: 15px;
+        }
+        
+        label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: bold;
+        }
+        
+        input[type="text"],
+        input[type="password"],
+        select {
+            width: 100%;
+            padding: 10px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            font-size: 16px;
+        }
+        
+        button {
+            background-color: #4CAF50;
+            color: white;
+            padding: 10px 20px;
+            border: none;
+            border-radius: 4px;
+            font-size: 16px;
+            cursor: pointer;
+            transition: background-color 0.3s;
+        }
+        
+        button:hover {
+            background-color: #45a049;
+        }
+        
+        .社团列表 {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+            gap: 20px;
+        }
+        
+        .社团卡片 {
+            border: 1px solid #ddd;
+            border-radius: 12px;
+            overflow: hidden;
+            transition: all 0.3s;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        
+        .社团卡片:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 8px 16px rgba(0,0,0,0.15);
+        }
+        
+        .社团卡片 .社团图片 {
+            width: 100%;
+            height: 200px;
+            object-fit: cover;
+            border-bottom: 1px solid #ddd;
+        }
+        
+        .社团卡片 .社团内容 {
+            padding: 15px;
+        }
+        
+        .社团卡片 h3 {
+            margin-bottom: 10px;
+            color: #4CAF50;
+            font-size: 18px;
+        }
+        
+        .社团卡片 p {
+            margin-bottom: 10px;
+            font-size: 14px;
+            line-height: 1.5;
+        }
+        
+        .标签 {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 5px;
+            margin-bottom: 10px;
+        }
+        
+        .标签 span {
+            background-color: #f0f0f0;
+            padding: 3px 8px;
+            border-radius: 12px;
+            font-size: 12px;
+        }
+        
+        .匹配度 {
+            color: #4CAF50;
+            font-weight: bold;
+            margin-top: 10px;
+        }
+        
+        .兴趣测评 {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+            margin-bottom: 20px;
+        }
+        
+        .兴趣选项 {
+            display: flex;
+            align-items: center;
+            gap: 5px;
+        }
+        
+        .报名状态 {
+            margin-top: 10px;
+            padding: 10px;
+            background-color: #f0f0f0;
+            border-radius: 4px;
+        }
+        
+        .hidden {
+            display: none;
+        }
+        
+        .error {
+            color: red;
+            margin-top: 10px;
+        }
+        
+        .success {
+            color: green;
+            margin-top: 10px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>社团招新智能匹配平台</h1>
+            <p>发现并加入适合你的社团</p>
+        </header>
+        
+        <nav style="background: linear-gradient(135deg, #4CAF50 0%, #45a049 100%); padding: 15px; border-radius: 8px; box-shadow: 0 4px 6px rgba(0,0,0,0.1);">
+            <ul style="list-style: none; display: flex; justify-content: space-around; margin: 0; padding: 0; flex-wrap: wrap;">
+                <li><a href="#登录" onclick="显示模块('登录')" style="color: white; text-decoration: none; font-weight: bold; padding: 8px 16px; border-radius: 20px; transition: all 0.3s; display: inline-block; margin: 5px;">登录</a></li>
+                <li><a href="#注册" onclick="显示模块('注册')" style="color: white; text-decoration: none; font-weight: bold; padding: 8px 16px; border-radius: 20px; transition: all 0.3s; display: inline-block; margin: 5px;">注册</a></li>
+                <li><a href="#兴趣测评" onclick="显示模块('兴趣测评')" style="color: white; text-decoration: none; font-weight: bold; padding: 8px 16px; border-radius: 20px; transition: all 0.3s; display: inline-block; margin: 5px;">兴趣探索</a></li>
+                <li><a href="#社团列表" onclick="显示模块('社团列表')" style="color: white; text-decoration: none; font-weight: bold; padding: 8px 16px; border-radius: 20px; transition: all 0.3s; display: inline-block; margin: 5px;">社团广场</a></li>
+                <li><a href="#活动列表" onclick="显示模块('活动列表')" style="color: white; text-decoration: none; font-weight: bold; padding: 8px 16px; border-radius: 20px; transition: all 0.3s; display: inline-block; margin: 5px;">活动中心</a></li>
+                <li><a href="#智能匹配" onclick="显示模块('智能匹配')" style="color: white; text-decoration: none; font-weight: bold; padding: 8px 16px; border-radius: 20px; transition: all 0.3s; display: inline-block; margin: 5px;">为你推荐</a></li>
+                <li><a href="#报名状态" onclick="显示模块('报名状态')" style="color: white; text-decoration: none; font-weight: bold; padding: 8px 16px; border-radius: 20px; transition: all 0.3s; display: inline-block; margin: 5px;">我的报名</a></li>
+            </ul>
+        </nav>
+        
+        <!-- 登录模块 -->
+        <section id="登录" class="模块">
+            <h2>用户登录</h2>
+            <div class="form-group">
+                <label for="登录学号">学号</label>
+                <input type="text" id="登录学号" placeholder="请输入学号">
+            </div>
+            <div class="form-group">
+                <label for="登录密码">密码</label>
+                <input type="password" id="登录密码" placeholder="请输入密码">
+            </div>
+            <button onclick="登录()">登录</button>
+            <div id="登录消息"></div>
+        </section>
+        
+        <!-- 注册模块 -->
+        <section id="注册" class="模块 hidden">
+            <h2>用户注册</h2>
+            <div class="form-group">
+                <label for="注册用户名">用户名</label>
+                <input type="text" id="注册用户名" placeholder="请输入用户名">
+            </div>
+            <div class="form-group">
+                <label for="注册学号">学号</label>
+                <input type="text" id="注册学号" placeholder="请输入学号">
+            </div>
+            <div class="form-group">
+                <label for="注册密码">密码</label>
+                <input type="password" id="注册密码" placeholder="请输入密码">
+            </div>
+            <div class="form-group">
+                <label>兴趣标签</label>
+                <div class="兴趣测评">
+                    <div class="兴趣选项">
+                        <input type="checkbox" id="兴趣1" value="编程">
+                        <label for="兴趣1">编程</label>
+                    </div>
+                    <div class="兴趣选项">
+                        <input type="checkbox" id="兴趣2" value="摄影">
+                        <label for="兴趣2">摄影</label>
+                    </div>
+                    <div class="兴趣选项">
+                        <input type="checkbox" id="兴趣3" value="辩论">
+                        <label for="兴趣3">辩论</label>
+                    </div>
+                    <div class="兴趣选项">
+                        <input type="checkbox" id="兴趣4" value="足球">
+                        <label for="兴趣4">足球</label>
+                    </div>
+                    <div class="兴趣选项">
+                        <input type="checkbox" id="兴趣5" value="文学">
+                        <label for="兴趣5">文学</label>
+                    </div>
+                    <div class="兴趣选项">
+                        <input type="checkbox" id="兴趣6" value="艺术">
+                        <label for="兴趣6">艺术</label>
+                    </div>
+                    <div class="兴趣选项">
+                        <input type="checkbox" id="兴趣7" value="体育">
+                        <label for="兴趣7">体育</label>
+                    </div>
+                    <div class="兴趣选项">
+                        <input type="checkbox" id="兴趣8" value="技术">
+                        <label for="兴趣8">技术</label>
+                    </div>
+                </div>
+            </div>
+            <button onclick="注册()">注册</button>
+            <div id="注册消息"></div>
+        </section>
+        
+        <!-- 兴趣探索模块 -->
+        <section id="兴趣测评" class="模块 hidden">
+            <h2 style="text-align: center; margin-bottom: 30px; color: #4CAF50;">兴趣探索</h2>
+            <div style="background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%); padding: 30px; border-radius: 12px; box-shadow: 0 4px 6px rgba(0,0,0,0.1);">
+                <p style="text-align: center; margin-bottom: 30px; font-size: 16px; color: #333;">通过回答以下问题，我们将为你推荐最适合的社团</p>
+                
+                <div class="测评问题" style="margin-bottom: 20px;">
+                    <h3 style="margin-bottom: 15px; color: #4CAF50;">1. 你最喜欢的活动类型是？</h3>
+                    <div class="兴趣选项" style="margin-bottom: 10px;">
+                        <input type="radio" name="question1" value="科技" id="q1_1">
+                        <label for="q1_1">科技类（编程、技术讲座等）</label>
+                    </div>
+                    <div class="兴趣选项" style="margin-bottom: 10px;">
+                        <input type="radio" name="question1" value="艺术" id="q1_2">
+                        <label for="q1_2">艺术类（摄影、绘画、音乐等）</label>
+                    </div>
+                    <div class="兴趣选项" style="margin-bottom: 10px;">
+                        <input type="radio" name="question1" value="学术" id="q1_3">
+                        <label for="q1_3">学术类（辩论、演讲、读书会等）</label>
+                    </div>
+                    <div class="兴趣选项" style="margin-bottom: 10px;">
+                        <input type="radio" name="question1" value="体育" id="q1_4">
+                        <label for="q1_4">体育类（足球、篮球、健身等）</label>
+                    </div>
+                </div>
+                
+                <div class="测评问题" style="margin-bottom: 20px;">
+                    <h3 style="margin-bottom: 15px; color: #4CAF50;">2. 你希望在社团中获得什么？</h3>
+                    <div class="兴趣选项" style="margin-bottom: 10px;">
+                        <input type="checkbox" id="q2_1" value="技能提升">
+                        <label for="q2_1">技能提升</label>
+                    </div>
+                    <div class="兴趣选项" style="margin-bottom: 10px;">
+                        <input type="checkbox" id="q2_2" value="社交圈">
+                        <label for="q2_2">扩大社交圈</label>
+                    </div>
+                    <div class="兴趣选项" style="margin-bottom: 10px;">
+                        <input type="checkbox" id="q2_3" value="比赛机会">
+                        <label for="q2_3">比赛机会</label>
+                    </div>
+                    <div class="兴趣选项" style="margin-bottom: 10px;">
+                        <input type="checkbox" id="q2_4" value="兴趣爱好">
+                        <label for="q2_4">发展兴趣爱好</label>
+                    </div>
+                </div>
+                
+                <div class="测评问题" style="margin-bottom: 20px;">
+                    <h3 style="margin-bottom: 15px; color: #4CAF50;">3. 你每周能投入多少时间到社团活动？</h3>
+                    <div class="兴趣选项" style="margin-bottom: 10px;">
+                        <input type="radio" name="question3" value="1-2小时" id="q3_1">
+                        <label for="q3_1">1-2小时</label>
+                    </div>
+                    <div class="兴趣选项" style="margin-bottom: 10px;">
+                        <input type="radio" name="question3" value="3-5小时" id="q3_2">
+                        <label for="q3_2">3-5小时</label>
+                    </div>
+                    <div class="兴趣选项" style="margin-bottom: 10px;">
+                        <input type="radio" name="question3" value="5小时以上" id="q3_3">
+                        <label for="q3_3">5小时以上</label>
+                    </div>
+                </div>
+                
+                <div class="测评问题" style="margin-bottom: 30px;">
+                    <h3 style="margin-bottom: 15px; color: #4CAF50;">4. 你对以下哪些领域特别感兴趣？</h3>
+                    <div class="兴趣测评" style="display: grid; grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); gap: 10px;">
+                        <div class="兴趣选项">
+                            <input type="checkbox" id="q4_1" value="编程">
+                            <label for="q4_1">编程</label>
+                        </div>
+                        <div class="兴趣选项">
+                            <input type="checkbox" id="q4_2" value="摄影">
+                            <label for="q4_2">摄影</label>
+                        </div>
+                        <div class="兴趣选项">
+                            <input type="checkbox" id="q4_3" value="辩论">
+                            <label for="q4_3">辩论</label>
+                        </div>
+                        <div class="兴趣选项">
+                            <input type="checkbox" id="q4_4" value="足球">
+                            <label for="q4_4">足球</label>
+                        </div>
+                        <div class="兴趣选项">
+                            <input type="checkbox" id="q4_5" value="文学">
+                            <label for="q4_5">文学</label>
+                        </div>
+                        <div class="兴趣选项">
+                            <input type="checkbox" id="q4_6" value="艺术">
+                            <label for="q4_6">艺术</label>
+                        </div>
+                        <div class="兴趣选项">
+                            <input type="checkbox" id="q4_7" value="体育">
+                            <label for="q4_7">体育</label>
+                        </div>
+                        <div class="兴趣选项">
+                            <input type="checkbox" id="q4_8" value="技术">
+                            <label for="q4_8">技术</label>
+                        </div>
+                    </div>
+                </div>
+                
+                <div style="text-align: center;">
+                    <button onclick="提交兴趣测评()" style="background: linear-gradient(135deg, #4CAF50 0%, #45a049 100%); padding: 12px 30px; font-size: 16px; border-radius: 25px; box-shadow: 0 4px 6px rgba(0,0,0,0.1);">开始匹配</button>
+                </div>
+                <div id="测评消息" style="margin-top: 20px; text-align: center;"></div>
+            </div>
+        </section>
+        
+        <!-- 社团列表模块 -->
+        <section id="社团列表" class="模块 hidden">
+            <h2>社团列表</h2>
+            <div id="社团列表内容" class="社团列表"></div>
+        </section>
+        
+        <!-- 智能匹配模块 -->
+        <section id="智能匹配" class="模块 hidden">
+            <h2>智能匹配</h2>
+            <p>根据你的兴趣推荐适合的社团</p>
+            <div id="匹配结果" class="社团列表"></div>
+        </section>
+        
+        <!-- 社团详情模块 -->
+        <section id="社团详情" class="模块 hidden">
+            <h2 id="社团详情标题"></h2>
+            <div id="社团详情内容"></div>
+            <button id="报名按钮" onclick="报名社团()">报名</button>
+        </section>
+        
+        <!-- 活动列表模块 -->
+        <section id="活动列表" class="模块 hidden">
+            <h2>活动中心</h2>
+            <div style="margin-bottom: 20px;">
+                <label for="活动类型">活动类型筛选：</label>
+                <select id="活动类型" onchange="筛选活动()">
+                    <option value="">全部类型</option>
+                    <option value="学科竞赛">学科竞赛</option>
+                    <option value="科技创新">科技创新</option>
+                    <option value="体育竞赛">体育竞赛</option>
+                    <option value="文化活动">文化活动</option>
+                    <option value="其他">其他</option>
+                </select>
+            </div>
+            <div id="活动列表内容" class="社团列表"></div>
+        </section>
+        
+        <!-- 活动详情模块 -->
+        <section id="活动详情" class="模块 hidden">
+            <h2 id="活动详情标题"></h2>
+            <div id="活动详情内容"></div>
+            <button id="报名活动按钮" onclick="报名活动()">报名</button>
+            <button id="取消报名按钮" onclick="取消报名活动()" class="hidden">取消报名</button>
+        </section>
+        
+        <!-- 报名状态模块 -->
+        <section id="报名状态" class="模块 hidden">
+            <h2>报名状态</h2>
+            <div id="报名状态内容"></div>
+        </section>
+    </div>
+    
+    <script>
+        // 全局变量
+        let 当前用户 = null;
+        const API_BASE = 'http://localhost:5001/api';
+        
+        // 显示指定模块，隐藏其他模块
+        function 显示模块(模块名) {
+            const 模块 = document.querySelectorAll('.模块');
+            模块.forEach(m => m.classList.add('hidden'));
+            document.getElementById(模块名).classList.remove('hidden');
+            
+            // 如果是社团列表，加载社团数据
+            if (模块名 === '社团列表') {
+                加载社团列表();
+            }
+            
+            // 如果是活动列表，加载活动数据
+            if (模块名 === '活动列表') {
+                加载活动列表();
+            }
+            
+            // 如果是报名状态，加载报名状态
+            if (模块名 === '报名状态' && 当前用户) {
+                加载报名状态();
+            }
+        }
+        
+        // 登录功能
+        function 登录() {
+            const 学号 = document.getElementById('登录学号').value;
+            const 密码 = document.getElementById('登录密码').value;
+            const 消息 = document.getElementById('登录消息');
+            
+            if (!学号 || !密码) {
+                消息.innerHTML = '<div class="error">请输入学号和密码</div>';
+                return;
+            }
+            
+            fetch(`${API_BASE}/登录`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({ 学号, 密码 })
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.error) {
+                    消息.innerHTML = `<div class="error">${data.error}</div>`;
+                } else {
+                    消息.innerHTML = `<div class="success">${data.message}</div>`;
+                    当前用户 = data.用户;
+                    // 登录成功后跳转到社团列表
+                    显示模块('社团列表');
+                }
+            })
+            .catch(error => {
+                消息.innerHTML = '<div class="error">登录失败，请稍后重试</div>';
+                console.error('登录错误:', error);
+            });
+        }
+        
+        // 注册功能
+        function 注册() {
+            const 用户名 = document.getElementById('注册用户名').value;
+            const 学号 = document.getElementById('注册学号').value;
+            const 密码 = document.getElementById('注册密码').value;
+            const 消息 = document.getElementById('注册消息');
+            
+            if (!用户名 || !学号 || !密码) {
+                消息.innerHTML = '<div class="error">请输入用户名、学号和密码</div>';
+                return;
+            }
+            
+            // 获取选中的兴趣
+            const 兴趣 = [];
+            const 兴趣选项 = document.querySelectorAll('#注册 input[type="checkbox"]:checked');
+            兴趣选项.forEach(option => {
+                兴趣.push(option.value);
+            });
+            
+            fetch(`${API_BASE}/注册`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({ 用户名, 学号, 密码, 兴趣 })
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.error) {
+                    消息.innerHTML = `<div class="error">${data.error}</div>`;
+                } else {
+                    消息.innerHTML = `<div class="success">${data.message}</div>`;
+                    // 注册成功后跳转到登录页面
+                    显示模块('登录');
+                }
+            })
+            .catch(error => {
+                消息.innerHTML = '<div class="error">注册失败，请稍后重试</div>';
+                console.error('注册错误:', error);
+            });
+        }
+        
+        // 提交兴趣测评
+        function 提交兴趣测评() {
+            const 兴趣 = [];
+            
+            // 获取问题1的答案（活动类型）
+            const q1 = document.querySelector('input[name="question1"]:checked');
+            if (q1) {
+                兴趣.push(q1.value);
+            }
+            
+            // 获取问题2的答案（期望获得）
+            const q2 = document.querySelectorAll('input[id^="q2_"]:checked');
+            q2.forEach(option => {
+                兴趣.push(option.value);
+            });
+            
+            // 获取问题4的答案（具体兴趣领域）
+            const q4 = document.querySelectorAll('input[id^="q4_"]:checked');
+            q4.forEach(option => {
+                兴趣.push(option.value);
+            });
+            
+            if (兴趣.length === 0) {
+                document.getElementById('测评消息').innerHTML = '<div class="error">请至少选择一个兴趣</div>';
+                return;
+            }
+            
+            // 调用智能匹配API
+            fetch(`${API_BASE}/智能匹配`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({ 兴趣 })
+            })
+            .then(response => response.json())
+            .then(data => {
+                // 显示匹配结果
+                显示匹配结果(data);
+                显示模块('智能匹配');
+            })
+            .catch(error => {
+                document.getElementById('测评消息').innerHTML = '<div class="error">测评失败，请稍后重试</div>';
+                console.error('测评错误:', error);
+            });
+        }
+        
+        // 加载社团列表
+        function 加载社团列表() {
+            fetch(`${API_BASE}/社团列表`)
+            .then(response => response.json())
+            .then(data => {
+                显示社团列表(data);
+            })
+            .catch(error => {
+                console.error('加载社团列表错误:', error);
+            });
+        }
+        
+        // 显示社团列表
+        function 显示社团列表(社团数据) {
+            const 容器 = document.getElementById('社团列表内容');
+            容器.innerHTML = '';
+            
+            社团数据.forEach(社团 => {
+                const 卡片 = document.createElement('div');
+                卡片.className = '社团卡片';
+                卡片.innerHTML = `
+                    <img src="${社团.图片}" alt="${社团.名称}" class="社团图片">
+                    <div class="社团内容">
+                        <h3>${社团.名称}</h3>
+                        <p><strong>类型:</strong> ${社团.类型}</p>
+                        <p><strong>简介:</strong> ${社团.简介}</p>
+                        <p><strong>成员规模:</strong> ${社团.成员规模}人</p>
+                        <p><strong>活动频率:</strong> ${社团.活动频率}</p>
+                        <div class="标签">
+                            ${社团.标签.map(标签 => `<span>${标签}</span>`).join('')}
+                        </div>
+                        <button onclick="查看社团详情(${社团.id})">查看详情</button>
+                    </div>
+                `;
+                容器.appendChild(卡片);
+            });
+        }
+        
+        // 显示匹配结果
+        function 显示匹配结果(匹配数据) {
+            const 容器 = document.getElementById('匹配结果');
+            容器.innerHTML = '';
+            
+            匹配数据.forEach(社团 => {
+                const 卡片 = document.createElement('div');
+                卡片.className = '社团卡片';
+                卡片.innerHTML = `
+                    <img src="${社团.图片}" alt="${社团.名称}" class="社团图片">
+                    <div class="社团内容">
+                        <h3>${社团.名称}</h3>
+                        <p><strong>类型:</strong> ${社团.类型}</p>
+                        <p><strong>简介:</strong> ${社团.简介}</p>
+                        <p><strong>成员规模:</strong> ${社团.成员规模}人</p>
+                        <div class="标签">
+                            ${社团.标签.map(标签 => `<span>${标签}</span>`).join('')}
+                        </div>
+                        <div class="匹配度">匹配度: ${社团.匹配度.toFixed(1)}%</div>
+                        <button onclick="查看社团详情(${社团.id})">查看详情</button>
+                    </div>
+                `;
+                容器.appendChild(卡片);
+            });
+        }
+        
+        // 查看社团详情
+        function 查看社团详情(社团id) {
+            fetch(`${API_BASE}/社团详情/${社团id}`)
+            .then(response => response.json())
+            .then(data => {
+                if (data.error) {
+                    alert(data.error);
+                } else {
+                    显示社团详情(data);
+                }
+            })
+            .catch(error => {
+                console.error('加载社团详情错误:', error);
+            });
+        }
+        
+        // 显示社团详情
+        function 显示社团详情(社团) {
+            document.getElementById('社团详情标题').textContent = 社团.名称;
+            const 内容 = document.getElementById('社团详情内容');
+            内容.innerHTML = `
+                <img src="${社团.图片}" alt="${社团.名称}" style="width: 100%; height: 300px; object-fit: cover; border-radius: 8px; margin-bottom: 20px;">
+                <p><strong>类型:</strong> ${社团.类型}</p>
+                <p><strong>简介:</strong> ${社团.简介}</p>
+                <p><strong>成员规模:</strong> ${社团.成员规模}人</p>
+                <p><strong>活动频率:</strong> ${社团.活动频率}</p>
+                <p><strong>招新要求:</strong> ${社团.招新要求}</p>
+                <p><strong>联系方式:</strong> ${社团.联系方式}</p>
+                <p><strong>活动历史:</strong> ${社团.活动历史.join(', ')}</p>
+                <div class="标签">
+                    ${社团.标签.map(标签 => `<span>${标签}</span>`).join('')}
+                </div>
+            `;
+            // 存储当前社团ID
+            document.getElementById('报名按钮').dataset.社团id = 社团.id;
+            显示模块('社团详情');
+        }
+        
+        // 报名社团
+        function 报名社团() {
+            if (!当前用户) {
+                alert('请先登录');
+                显示模块('登录');
+                return;
+            }
+            
+            const 社团id = parseInt(document.getElementById('报名按钮').dataset.社团id);
+            
+            fetch(`${API_BASE}/报名`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({ 用户id: 当前用户.id, 社团id })
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.error) {
+                    alert(data.error);
+                } else {
+                    alert(data.message);
+                    显示模块('报名状态');
+                    加载报名状态();
+                }
+            })
+            .catch(error => {
+                console.error('报名错误:', error);
+                alert('报名失败，请稍后重试');
+            });
+        }
+        
+        // 加载报名状态
+        function 加载报名状态() {
+            if (!当前用户) {
+                document.getElementById('报名状态内容').innerHTML = '<p>请先登录</p>';
+                return;
+            }
+            
+            fetch(`${API_BASE}/报名状态/${当前用户.id}`)
+            .then(response => response.json())
+            .then(data => {
+                显示报名状态(data);
+            })
+            .catch(error => {
+                console.error('加载报名状态错误:', error);
+            });
+        }
+        
+        // 显示报名状态
+        function 显示报名状态(报名数据) {
+            const 容器 = document.getElementById('报名状态内容');
+            
+            if (报名数据.length === 0) {
+                容器.innerHTML = '<p>暂无报名记录</p>';
+                return;
+            }
+            
+            容器.innerHTML = '';
+            报名数据.forEach(报名 => {
+                const 项目 = document.createElement('div');
+                项目.className = '报名状态';
+                项目.innerHTML = `
+                    <h3>${报名.社团.名称}</h3>
+                    <p><strong>状态:</strong> ${报名.状态}</p>
+                    <p><strong>类型:</strong> ${报名.社团.类型}</p>
+                    <p><strong>简介:</strong> ${报名.社团.简介}</p>
+                `;
+                容器.appendChild(项目);
+            });
+        }
+        
+        // 加载活动列表
+        function 加载活动列表() {
+            const 类型 = document.getElementById('活动类型').value;
+            let url = `${API_BASE}/活动列表`;
+            if (类型) {
+                url += `?类型=${encodeURIComponent(类型)}`;
+            }
+            fetch(url)
+            .then(response => response.json())
+            .then(data => {
+                显示活动列表(data);
+            })
+            .catch(error => {
+                console.error('加载活动列表错误:', error);
+            });
+        }
+        
+        // 筛选活动
+        function 筛选活动() {
+            加载活动列表();
+        }
+        
+        // 显示活动列表
+        function 显示活动列表(活动数据) {
+            const 容器 = document.getElementById('活动列表内容');
+            容器.innerHTML = '';
+            
+            if (活动数据.length === 0) {
+                容器.innerHTML = '<p>暂无活动</p>';
+                return;
+            }
+            
+            活动数据.forEach(活动 => {
+                const 卡片 = document.createElement('div');
+                卡片.className = '社团卡片';
+                卡片.innerHTML = `
+                    <div class="社团内容">
+                        <h3>${活动.标题}</h3>
+                        <p><strong>类型:</strong> ${活动.类型}</p>
+                        <p><strong>时间:</strong> ${活动.时间}</p>
+                        <p><strong>地点:</strong> ${活动.地点}</p>
+                        <p><strong>描述:</strong> ${活动.描述}</p>
+                        <p><strong>报名人数:</strong> ${活动.报名人数}</p>
+                        <button onclick="查看活动详情(${活动.id})">查看详情</button>
+                    </div>
+                `;
+                容器.appendChild(卡片);
+            });
+        }
+        
+        // 查看活动详情
+        function 查看活动详情(活动id) {
+            fetch(`${API_BASE}/活动详情/${活动id}`)
+            .then(response => response.json())
+            .then(data => {
+                if (data.error) {
+                    alert(data.error);
+                } else {
+                    显示活动详情(data);
+                }
+            })
+            .catch(error => {
+                console.error('加载活动详情错误:', error);
+            });
+        }
+        
+        // 显示活动详情
+        function 显示活动详情(活动) {
+            document.getElementById('活动详情标题').textContent = 活动.标题;
+            const 内容 = document.getElementById('活动详情内容');
+            内容.innerHTML = `
+                <p><strong>类型:</strong> ${活动.类型}</p>
+                <p><strong>时间:</strong> ${活动.时间}</p>
+                <p><strong>地点:</strong> ${活动.地点}</p>
+                <p><strong>描述:</strong> ${活动.描述}</p>
+                <p><strong>要求:</strong> ${活动.要求}</p>
+                <p><strong>报名人数:</strong> ${活动.报名人数}</p>
+                ${活动.社团 ? `<p><strong>举办社团:</strong> ${活动.社团.名称}</p>` : ''}
+            `;
+            
+            // 存储当前活动ID
+            document.getElementById('报名活动按钮').dataset.活动id = 活动.id;
+            document.getElementById('取消报名按钮').dataset.活动id = 活动.id;
+            
+            // 检查用户是否已报名
+            if (当前用户 && 活动.报名列表 && 活动.报名列表.includes(当前用户.id)) {
+                document.getElementById('报名活动按钮').classList.add('hidden');
+                document.getElementById('取消报名按钮').classList.remove('hidden');
+            } else {
+                document.getElementById('报名活动按钮').classList.remove('hidden');
+                document.getElementById('取消报名按钮').classList.add('hidden');
+            }
+            
+            显示模块('活动详情');
+        }
+        
+        // 报名活动
+        function 报名活动() {
+            if (!当前用户) {
+                alert('请先登录');
+                显示模块('登录');
+                return;
+            }
+            
+            const 活动id = parseInt(document.getElementById('报名活动按钮').dataset.活动id);
+            
+            fetch(`${API_BASE}/报名活动`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({ 用户id: 当前用户.id, 活动id })
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.error) {
+                    alert(data.error);
+                } else {
+                    alert(data.message);
+                    // 重新加载活动详情
+                    查看活动详情(活动id);
+                }
+            })
+            .catch(error => {
+                console.error('报名活动错误:', error);
+                alert('报名失败，请稍后重试');
+            });
+        }
+        
+        // 取消报名活动
+        function 取消报名活动() {
+            if (!当前用户) {
+                alert('请先登录');
+                显示模块('登录');
+                return;
+            }
+            
+            const 活动id = parseInt(document.getElementById('取消报名按钮').dataset.活动id);
+            
+            fetch(`${API_BASE}/取消报名活动`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({ 用户id: 当前用户.id, 活动id })
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.error) {
+                    alert(data.error);
+                } else {
+                    alert(data.message);
+                    // 重新加载活动详情
+                    查看活动详情(活动id);
+                }
+            })
+            .catch(error => {
+                console.error('取消报名活动错误:', error);
+                alert('取消报名失败，请稍后重试');
+            });
+        }
+        
+        // 页面加载时加载社团列表
+        window.onload = function() {
+            加载社团列表();
+        };
+    </script>
+</body>
+</html>
